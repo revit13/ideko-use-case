@@ -1,0 +1,354 @@
+<script type="text/x-red" data-template-name="savvy">
+    <div class="form-row">
+        <label for="node-input-name"><i class="fa fa-tag"></i> Name</label>
+        <input type="text" id="node-input-name" placeholder="Name">
+    </div>
+
+    <br/>
+	
+	<div class="form-row">
+        <label for="node-input-cncmanufacturer"><i class="fa fa-globe"></i> CNC manufacturer</label>
+        <select id="node-input-cncmanufacturer">
+			<option value="fagor">Fagor</option>
+			<option value="fanuc">Fanuc</option>
+			<option value="fidia">Fidia</option>
+			<option value="heidenhain">Heidenhain</option>
+			<option value="siemens">Siemens</option>
+        </select>
+    </div>
+	
+    <div class="form-row">
+        <label for="node-input-endpoint"><i class="fa fa-globe"></i> Endpoint</label>
+        <input type="text" id="node-input-endpoint" placeholder="endpoint">
+    </div>
+	
+	<div class="form-row">
+        <label for="node-input-returntype"><i class="fa fa-arrow-left"></i> Return</label>
+        <select id="node-input-returntype">
+			<option value="utf-8">a UTF-8 string</option>
+            <option value="json">a parsed JSON object</option>
+        </select>
+    </div>
+	
+    <div  class="form-row" >
+        <label for="node-input-apitype"><i class="fa fa-cogs"></i> API type</label>
+        <select id="node-input-apitype" onchange="apiTypeChange()">
+            <option value="cloud">Cloud (API cloud)</option>
+            <option value="local">Local (RestStreaming)</option>
+        </select>
+    </div>
+	
+	<br>
+	
+	<div class="form-row" id ="port">
+        <label for="node-input-port"><i class="fa fa-tag"></i> Port</label>
+        <input type="text" id="node-input-port" placeholder="port">
+    </div>
+		
+    <div class="form-row" id="key">
+        <label for="node-input-key"><i class="fa fa-tag"></i> Key</label>
+        <input type="text" id="node-input-key" placeholder="key">
+    </div>
+	
+	<div class="form-row" id="secret">
+        <label for="node-input-secret"><i class="fa fa-tag"></i> Secret</label>
+        <input type="text" id="node-input-secret" placeholder="secret">
+    </div>
+
+    <div  class="form-row" id="method">
+        <label for="node-input-target"><i class="fa fa-cogs"></i> Method</label>
+        <select id="node-input-target" onchange="methodChange()">
+            <option value="list-indicators">List Indicators</option>
+            <option value="list-capture-groups">List Capture Groups</option>
+            <option value="list-machines">List Machines</option>
+            <option value="list-locations">List Locations</option>
+            <option value="details-indicator">Details Indicator</option>
+            <option value="details-capture-group">Details Capture Group</option>
+            <option value="details-machine">Details Machine</option>
+            <option value="details-location">Details Location</option>
+            <option value="data">Data</option>
+            <option value="stream">Stream</option>
+        </select>
+    </div>
+	
+    <div class="form-row" id="locationId">
+        <label for="node-input-locationId"><i class="fa fa-tag"></i> LocationId</label>
+        <input type="text" id="node-input-locationId" placeholder="location-id">
+    </div>
+
+    <div class="form-row" id="machineId">
+        <label for="node-input-machineId"><i class="fa fa-tag"></i> MachineId</label>
+        <input type="text" id="node-input-machineId" placeholder="machine-id">
+    </div>
+
+    <div class="form-row" id="groupId">
+        <label for="node-input-groupId"><i class="fa fa-tag"></i> GroupId</label>
+        <input type="text" id="node-input-groupId" placeholder="group-id">
+    </div>
+	
+    <div class="form-row" id="indicatorId">
+        <label for="node-input-indicatorId"><i class="fa fa-tag"></i> IndicatorId</label>
+        <input type="text" id="node-input-indicatorId" placeholder="indicator-id">
+    </div>
+	
+    <div class="form-row" id="fromTs">
+        <label for="node-input-to-ts"><i class="fa fa-tag"></i> From ts</label>
+        <input placeholder="timestamp im milliseconds" type="text" id="node-input-fromTs">
+    </div>
+	
+    <div class="form-row" id="toTs">
+        <label for="node-input-to-ts"><i class="fa fa-tag"></i> To ts</label>
+        <input placeholder="timestamp im milliseconds" type="text" id="node-input-toTs">
+    </div>
+
+</script>
+
+<!-- Next, some simple help text is provided for the node. -->
+<script type="text/x-red" data-help-name="savvy">
+    <p>This node can be used to connect to the Savvy API. The property endpoint should be used to specify the location of the box 
+	endpoint should be defined without the "https" (e.g., api-test.com). The property key will be used to ensure the proper HMAC encryption. 
+	The select box Method can be used to specify which method of the API will be called by the node.</p>
+	<p>The <i>LocationId</i>, <i>MachineId</i>, <i>GroupId</i>, <i>IndicatorId</i> , <i>From Timestamp</i> and <i>To Timestamp</i> parameters can be passed using properties in the <i>msg</i> object. 
+	The properties must be named this way: locationId, machineId, groupId, indicatorId, fromTs and toTs. The message has preference over the node configuration.</p>
+	<p>An ongoing request (stream or not) can be stopped at any time by providing a message with a <code>stopRequest</code> property with <code>true</code> value.</p>
+	<p>The node button behaves this way:</p>
+	<ul>
+		<li>If the request is a stream, the first click starts the request (starts the stream) and a second click stops the stream.</li>
+		<li>If the request is not a stream, each click starts a new request.</li>
+	</ul>
+	<p>For the <i>Stream</i> requests, the <code>Machine Id</code> field can contain several machines separated by comma, with no spaces.</p>
+	<p>The <i>CNC Manufacturer</i> field is just to provide more information downstream the flow and it has no impact on the execution of this node.</p>
+</script>
+
+<script>
+function apiTypeChange()
+{
+	apitype = document.getElementById("node-input-apitype").value;
+
+	portDiv = document.getElementById("port");
+	keyDiv = document.getElementById("key");
+	secretDiv = document.getElementById("secret");
+	methodDiv = document.getElementById("method");
+	locationIdDiv = document.getElementById("locationId");
+	machineIdDiv = document.getElementById("machineId");
+	groupIdDiv = document.getElementById("groupId");
+	indicatorIdDiv = document.getElementById("indicatorId");
+	fromTsDiv = document.getElementById("fromTs");
+	toTsDiv = document.getElementById("toTs");
+	
+	if (apitype === 'cloud')
+	{
+		portDiv.style.display = "none";
+		keyDiv.style.display = " block";
+		secretDiv.style.display = " block";
+		methodDiv.style.display = " block";
+		locationIdDiv.style.display = " block";
+		machineIdDiv.style.display = " block";
+		groupIdDiv.style.display = " block";
+		fromTsDiv.style.display = " block";
+		toTsDiv.style.display = " block";
+
+	}
+	else if (apitype === 'local')
+	{
+		portDiv.style.display = " block";
+		keyDiv.style.display = "none";
+		secretDiv.style.display = "none";
+		methodDiv.style.display = "none";
+		locationIdDiv.style.display = "none";
+		machineIdDiv.style.display = " block";
+		groupIdDiv.style.display = "none";
+	}	
+}
+
+function methodChange()
+{
+	methodtype = document.getElementById("node-input-target").value;
+	
+	locationIdDiv = document.getElementById("locationId");
+	machineIdDiv = document.getElementById("machineId");
+	groupIdDiv = document.getElementById("groupId");
+	indicatorIdDiv = document.getElementById("indicatorId");
+	fromTsDiv = document.getElementById("fromTs");
+	toTsDiv = document.getElementById("toTs");
+	
+	switch (methodtype)
+	{
+		case "list-indicators":
+			locationIdDiv.style.display = " block";
+			machineIdDiv.style.display = " block";
+			groupIdDiv.style.display = " block";
+			indicatorIdDiv.style.display = " none";
+			fromTsDiv.style.display = " none";
+			toTsDiv.style.display = " none";
+			break;
+			
+		case "list-capture-groups":
+			locationIdDiv.style.display = " block";
+			machineIdDiv.style.display = " block";
+			groupIdDiv.style.display = " none";
+			indicatorIdDiv.style.display = " none";
+			fromTsDiv.style.display = " none";
+			toTsDiv.style.display = " none";
+			break;
+			
+		case "list-machiness":
+			locationIdDiv.style.display = " block";
+			machineIdDiv.style.display = " none";
+			groupIdDiv.style.display = " none";
+			indicatorIdDiv.style.display = " none";
+			fromTsDiv.style.display = " none";
+			toTsDiv.style.display = " none";
+			break;
+			
+		case "list-locations":
+			locationIdDiv.style.display = " none";
+			machineIdDiv.style.display = " none";
+			groupIdDiv.style.display = " none";
+			indicatorIdDiv.style.display = " none";
+			fromTsDiv.style.display = " none";
+			toTsDiv.style.display = " none";
+			break;
+			
+		case "details-indicator":
+			locationIdDiv.style.display = " block";
+			machineIdDiv.style.display = " block";
+			groupIdDiv.style.display = " block";
+			indicatorIdDiv.style.display = " block";
+			fromTsDiv.style.display = " none";
+			toTsDiv.style.display = " none";
+			break;
+			
+		case "details-capture-group":
+			locationIdDiv.style.display = " block";
+			machineIdDiv.style.display = " block";
+			groupIdDiv.style.display = " block";
+			indicatorIdDiv.style.display = " none";
+			fromTsDiv.style.display = " none";
+			toTsDiv.style.display = " none";
+			break;
+			
+		case "details-machine":
+			locationIdDiv.style.display = " block";
+			machineIdDiv.style.display = " block";
+			groupIdDiv.style.display = " none";
+			indicatorIdDiv.style.display = " none";
+			fromTsDiv.style.display = " none";
+			toTsDiv.style.display = " none";
+			break;
+			
+		case "details-location":
+			locationIdDiv.style.display = " block";
+			machineIdDiv.style.display = " none";
+			groupIdDiv.style.display = " none";
+			indicatorIdDiv.style.display = " none";
+			fromTsDiv.style.display = " none";
+			toTsDiv.style.display = " none";
+			break;
+			
+		case "data":
+			locationIdDiv.style.display = " block";
+			machineIdDiv.style.display = " block";
+			groupIdDiv.style.display = " block";
+			indicatorIdDiv.style.display = " block";
+			fromTsDiv.style.display = " block";
+			toTsDiv.style.display = " block";
+			break;
+			
+		case "stream":
+			locationIdDiv.style.display = " none";
+			machineIdDiv.style.display = " block";
+			groupIdDiv.style.display = " none";
+			indicatorIdDiv.style.display = " none";
+			fromTsDiv.style.display = " none";
+			toTsDiv.style.display = " none";
+			break;
+	}
+}
+</script>
+
+<script type="text/javascript">
+    RED.nodes.registerType('savvy', {
+        category: 'savvy',
+        defaults: {
+            name: {
+                value: ""
+            },
+			cncmanufacturer: {
+                value: ""
+            },	
+            endpoint: {
+                value: ""
+            },
+			returntype: {
+                value: ""
+            },
+			apitype: {
+                value: ""
+            },
+			port: {
+                value: ""
+            },
+            key: {
+                value: ""
+            },
+			secret: {
+                value: ""
+            },
+            locationId: {
+                value: ""
+            },
+            groupId: {
+                value: ""
+            },
+            machineId: {
+                value: ""
+            },
+            indicatorId: {
+                value: ""
+            },
+            fromTs: {
+                value: ""
+            },
+            toTs: {
+                value: ""
+            },
+            target: {
+                value: "location"
+            }
+        },
+        inputs: 1,
+        outputs: 1,
+        icon: "hash.png",
+        color: "#FFFFFF",
+        label: function () {
+            return this.name || " Savvy node ";
+        },
+        labelStyle: function () {
+            return this.name ? "node_label_italic" : "";
+        },
+        button: {
+            onclick: function() {
+                var node = this;
+                $.ajax({
+                    url: "savvy/"+this.id,
+                    type:"POST",
+                    success: function(resp) {
+                        RED.notify(node._("savvy.success",{label:label}),"success");
+                    },
+                    error: function(jqXHR,textStatus,errorThrown) {
+                        if (jqXHR.status == 404) {
+                            RED.notify(node._("common.notification.error",{message:node._("common.notification.errors.not-deployed")}),"error");
+                        } else if (jqXHR.status == 500) {
+                            RED.notify(node._("common.notification.error",{message:node._("inject.errors.failed")}),"error");
+                        } else if (jqXHR.status == 0) {
+                            RED.notify(node._("common.notification.error",{message:node._("common.notification.errors.no-response")}),"error");
+                        } else {
+                            RED.notify(node._("common.notification.error",{message:node._("common.notification.errors.unexpected",{status:jqXHR.status,message:textStatus})}),"error");
+                        }
+                    }
+                });
+            }
+        }
+    });
+</script>

@@ -1,0 +1,20 @@
+{
+    "name": "savvy-contrib",
+    "version": "0.0.2",
+    "description": "components to interact with the Savvy Box",
+    "keywords": [
+        "savvy",
+        "nodered"
+    ],
+    "repository": {
+        "type": "git",
+        "url": "git+https://github.com/SINTEF-9012/mc-suite_node-red.git"
+    },
+    "author": "SINTEF-9012",
+    "license": "Apache-2.0",
+    "node-red": {
+        "nodes": {
+            "savvy": "savvy.js"
+        }
+    }
+}
