@@ -1,0 +1,19 @@
+version: '3'
+services:
+  elasticserach:
+    image: docker.elastic.co/elasticsearch/elasticsearch:6.2.4
+    ports:
+      - 9200:9200
+    environment: 
+      - "discovery.type=single-node"
+  vdc:
+    build: 
+      context: .
+    depends_on:
+       - elasticserach
+    ports:
+      - 8484:8484
+      - 1880:1880
+      - 8080:80
+    volumes: 
+      - .config:/.config/:ro
