@@ -79,10 +79,17 @@ module.exports = function (RED) {
 						console.log("Setting the payload as utf-8 string");
 						msg_input.payload = res;
 						break;
-					case "json":
+					case "json":						
+						console.log("Setting the payload as JSON object");						
 						// TODO posible error SyntaxError: Unexpected end of JSON input
-						console.log("Setting the payload as JSON object");
+						//try {
 						msg_input.payload = JSON.parse(res);
+							
+						//} catch(err) {
+							// Sabemos que cuando se para el stream puede dar este error 							
+							//console.log(err.toString());
+						//}
+						
 						// AITOR TODO - poner un campo más con el código de estado recogido?
 						// msg_input.statusCode = statusCode;
 						break;
@@ -170,7 +177,15 @@ module.exports = function (RED) {
 		}
 		else if (node.apitype === 'local')
 		{
-			ep += "/stream?machines=" + machineId;
+			switch(node.target)
+			{
+				case "stream":
+					ep += "/stream?machines=" + machineId;
+					break;
+				case "details-indicator":
+					ep += "/indicators";
+					break;
+			}
 		}
 		
         return ep;
@@ -249,9 +264,15 @@ module.exports = function (RED) {
 					// Si cambiamos la concatenación de chunks y única respuesta final por ir respondiendo chunk a chunk, aquí solo entraríamos
 					// con el stop, y ya no haría falta llamar al callback.
 					response.on('end', function () {
-						console.log("Response on END fired");
-						console.log("Calling the callback with the response received");
-						callback(str);
+						console.log("Response on END fired");						
+						// si es un stream, no llamamos al callback porque estamos simplemente parando la petición
+						// Solo se le llama enpeticiones no stream, que es donde se mandan datos al finalizar la petición a la API
+						if (node.target !== "stream") {
+							console.log("Calling the callback with the response received");		
+							callback(str);
+						}
+						else 
+							console.log('No se llama al callback porque la petición es de tipo stream');
 					});
 
 					response.on('error', function (e) {
@@ -274,38 +295,57 @@ module.exports = function (RED) {
 						"Content-Type": "text/plain; charset=UTF-8"
 					}
 				};
-			
+				
 				// Uses HTTP. Request es una variable global
 				request = http.request(options, function (response) {
 
 					var str = ''
 					response.on('data', function (chunk) 
 					{
-						console.log("response.on(data): Lanzado");						
 						
-						try {
-							// The '' + chunk is added to convert the buffer into a string
-							var responseString = '' + chunk;
+						// If we are streaming , we return the chunk itself as the full response is in one chunk
+						if (node.target === "stream")
+						{
+							console.log("response.on(data): Lanzado");						
 							
-							// Modify the line breaks to get always a "\r\n"
-							var responseArray = responseString.replace("\r", "").replace("\n", "\r\n").split("\r\n")
-							
-							// Send callback for each line
-							responseArray.forEach(function(el) {
-								callback(el);
-							});
-							
-						} catch(ex) {
-							// When an empty string comes
+							try {
+								// The '' + chunk is added to convert the buffer into a string
+								var responseString = '' + chunk;
+								
+								// Modify the line breaks to get always a "\r\n"
+								var responseArray = responseString.replace("\r", "").replace("\n", "\r\n").split("\r\n")
+								
+								// Send callback for each line
+								responseArray.forEach(function(el) {
+									callback(el);
+								});
+								
+							} catch(ex) {
+								// When an empty string comes do nothing
+								// Este captura el error que se recib del JSON.load() del callbak sendRequest
+								console.log("Recibidos datos vacíos, no se llama al callback sendRequest"); // TODO estamos asumiendo mucho
+							}
+						}
+						else
+						{
+							// No es un stream, asignamos el chunk (la respuesta total ya que aquí no hay chunk como tal) al str
+							console.log("The callback is not a stream, joining chunks to respond");
+							str += chunk;
 						}
 			
 					});
 
 					// if the request is stopped
 					response.on('end', function () {
-						console.log("Response on END fired");
-						console.log("Calling the callback with the response received");
-						callback(str);
+						console.log("Response on END fired");						
+						// si es un stream, no llamamos al callback porque estamos simplemente parando la petición
+						// Solo se le llama enpeticiones no stream, que es donde se mandan datos al finalizar la petición a la API
+						if (node.target !== "stream") {
+							console.log("Calling the callback with the response received");		
+							callback(str);
+						}
+						else 
+							console.log('No se llama al callback porque la petición es de tipo stream');
 					});
 
 					response.on('error', function (e) {
@@ -351,6 +391,8 @@ module.exports = function (RED) {
 		if (adminNode != null) {
 			try {
 				console.log("Clic en el botón del nodo");
+				console.log("Admin target es: " + adminNode.target);
+				console.log("Stream status antes de cambiar: " + adminNode.streamStatus);
 				// We change the status flag
 				adminNode.streamStatus = !adminNode.streamStatus;
 				// Stop button
