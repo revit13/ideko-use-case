@@ -3,7 +3,6 @@
         <label for="node-input-name"><i class="fa fa-tag"></i> Name</label>
         <input type="text" id="node-input-name" placeholder="Name">
     </div>
-
     <br/>
 	
 	<div class="form-row">
@@ -54,20 +53,19 @@
         <label for="node-input-secret"><i class="fa fa-tag"></i> Secret</label>
         <input type="text" id="node-input-secret" placeholder="secret">
     </div>
-
     <div  class="form-row" id="method">
         <label for="node-input-target"><i class="fa fa-cogs"></i> Method</label>
         <select id="node-input-target" onchange="methodChange()">
-            <option value="list-indicators">List Indicators</option>
-            <option value="list-capture-groups">List Capture Groups</option>
-            <option value="list-machines">List Machines</option>
-            <option value="list-locations">List Locations</option>
-            <option value="details-indicator">Details Indicator</option>
-            <option value="details-capture-group">Details Capture Group</option>
-            <option value="details-machine">Details Machine</option>
-            <option value="details-location">Details Location</option>
-            <option value="data">Data</option>
-            <option value="stream">Stream</option>
+            <option value="list-indicators" id="list-indicators" >List Indicators</option>
+            <option value="list-capture-groups" id="list-capture-groups">List Capture Groups</option>
+            <option value="list-machines" id="list-machines">List Machines</option>
+            <option value="list-locations" id="list-locations">List Locations</option>
+            <option value="details-indicator" id="details-indicator">Details Indicator</option>
+            <option value="details-capture-group" id="details-capture-group">Details Capture Group</option>
+            <option value="details-machine" id="details-machine">Details Machine</option>
+            <option value="details-location" id="details-location">Details Location</option>
+            <option value="data" id="data">Data</option>
+            <option value="stream" id="stream">Stream</option>
         </select>
     </div>
 	
@@ -75,12 +73,10 @@
         <label for="node-input-locationId"><i class="fa fa-tag"></i> LocationId</label>
         <input type="text" id="node-input-locationId" placeholder="location-id">
     </div>
-
     <div class="form-row" id="machineId">
         <label for="node-input-machineId"><i class="fa fa-tag"></i> MachineId</label>
         <input type="text" id="node-input-machineId" placeholder="machine-id">
     </div>
-
     <div class="form-row" id="groupId">
         <label for="node-input-groupId"><i class="fa fa-tag"></i> GroupId</label>
         <input type="text" id="node-input-groupId" placeholder="group-id">
@@ -100,7 +96,7 @@
         <label for="node-input-to-ts"><i class="fa fa-tag"></i> To ts</label>
         <input placeholder="timestamp im milliseconds" type="text" id="node-input-toTs">
     </div>
-
+	
 </script>
 
 <!-- Next, some simple help text is provided for the node. -->
@@ -124,7 +120,6 @@
 function apiTypeChange()
 {
 	apitype = document.getElementById("node-input-apitype").value;
-
 	portDiv = document.getElementById("port");
 	keyDiv = document.getElementById("key");
 	secretDiv = document.getElementById("secret");
@@ -141,26 +136,35 @@ function apiTypeChange()
 		portDiv.style.display = "none";
 		keyDiv.style.display = " block";
 		secretDiv.style.display = " block";
-		methodDiv.style.display = " block";
 		locationIdDiv.style.display = " block";
 		machineIdDiv.style.display = " block";
 		groupIdDiv.style.display = " block";
 		fromTsDiv.style.display = " block";
 		toTsDiv.style.display = " block";
-
+		var op = document.getElementById("node-input-target").getElementsByTagName("option");
+		for (var i = 0; i < op.length; i++) {
+			op[i].disabled = false;
+		}
+		
 	}
 	else if (apitype === 'local')
 	{
 		portDiv.style.display = " block";
 		keyDiv.style.display = "none";
 		secretDiv.style.display = "none";
-		methodDiv.style.display = "none";
 		locationIdDiv.style.display = "none";
 		machineIdDiv.style.display = " block";
 		groupIdDiv.style.display = "none";
+		document.getElementById("list-indicators").disabled = true;
+		document.getElementById("list-capture-groups").disabled = true;
+		document.getElementById("list-machines").disabled = true;
+		document.getElementById("list-locations").disabled = true;
+		document.getElementById("details-capture-group").disabled = true;
+		document.getElementById("details-machine").disabled = true;
+		document.getElementById("details-location").disabled = true;
+		document.getElementById("data").disabled = true;
 	}	
 }
-
 function methodChange()
 {
 	methodtype = document.getElementById("node-input-target").value;
