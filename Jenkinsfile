@@ -3,9 +3,6 @@ pipeline {
     stages {
         stage('Image creation & image push') {
             agent any
-            options {
-                skipDefaultCheckout true
-            }
             steps {
                 echo 'Creating the VDC image...' 
 
