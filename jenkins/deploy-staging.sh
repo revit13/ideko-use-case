@@ -11,5 +11,5 @@ sudo docker stop --time 20 ideko-use-case || true
 sudo docker rm --force ideko-use-case || true
 sudo docker pull ditas/ideko-use-case:latest
 # SET THE PORT MAPPING
-sudo docker run -p XXXXXXXXXXXXXXXXXXXXXXXXXXXXXX:8080 -d --name ideko-use-case ditas/ideko-use-case:latest
+sudo docker run -p 50017:8080 -p 50018:8484 -d --name ideko-use-case ditas/ideko-use-case:latest
 ENDSSH
