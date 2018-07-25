@@ -24,7 +24,7 @@ metadata:
 spec:
   containers:
   - name: ideko-uc
-    image: ditas/ideko-use-case-vdc:001
+    image: ditas/ideko-use-case:001
     ports:
     - containerPort: 8080
     - containerPort: 8484
