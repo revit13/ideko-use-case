@@ -86,7 +86,7 @@ RUN adduser -D -H -h /usr/src/node-red node-red \
 USER node-red
 
 # package.json contains Node-RED NPM module and node dependencies
-COPY node-red-files/package.json /usr/src/node-red/
+COPY node-red-files/settings/package.json /usr/src/node-red/
 RUN npm install
 
 # Environment variable holding file path for flows configuration
@@ -99,9 +99,9 @@ RUN npm install node-red-node-mysql
 RUN npm install node-red-contrib-influxdb
 
 # Copy the HTTPin and Savvy nodes
-ADD node-red-files/setting.js /data/setting.js
-ADD httpin-node/* ./node_modules/node-red/nodes/core/io/
-ADD savvy-node/* /savvy_node_data/
+ADD node-red-files/settings/setting.js /data/setting.js
+ADD node-red-files/httpin-node/* ./node_modules/node-red/nodes/core/io/
+ADD node-red-files/savvy-node/* /savvy_node_data/
 
 # Needs to be root to make the npm links
 USER root
