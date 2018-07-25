@@ -1,5 +1,5 @@
 # ideko-use-case
-Resoruces for the IDEKO use case.
+Resources for the IDEKO use case.
 
 node-red-dontainer
 ===================
