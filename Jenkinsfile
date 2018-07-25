@@ -34,6 +34,7 @@ pipeline {
             }
             steps {
                 // sh './jenkins/deploy/deploy-staging.sh' 
+		echo "continue..."
             }
         }
     }
