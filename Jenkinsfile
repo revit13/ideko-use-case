@@ -7,7 +7,7 @@ pipeline {
                 skipDefaultCheckout true
             }
             steps {
-                echo 'Creating the VDC image...'
+                echo 'Creating the VDC image...' 
 
                 sh "docker build -t \"ditas/ideko-use-case\" -f Dockerfile ."
                 echo "Done"
