@@ -31,7 +31,7 @@ pipeline {
             }
             steps {
                 // sh './jenkins/deploy/deploy-staging.sh' 
-		echo "continue..."
+		echo "For the moment we don't deploy the VDC on Staging."
             }
         }
     }
