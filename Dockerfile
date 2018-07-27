@@ -103,10 +103,6 @@ ADD node-red-files/settings/setting.js /data/setting.js
 ADD node-red-files/httpin-node/* ./node_modules/node-red/nodes/core/io/
 ADD node-red-files/savvy-node/* /savvy_node_data/
 
-# Add entrypoint script to docker
-RUN mkdir /dockerentrypoint
-ADD scripts/copy-node-red-flow.sh /dockerentrypoint/
-RUN ["chmod", "+x", "/dockerentrypoint/copy-node-red-flow.sh"]
 
 # Needs to be root to make the npm links
 USER root
@@ -115,6 +111,11 @@ RUN npm install
 RUN npm link
 WORKDIR /data
 RUN npm link savvy-contrib
+
+# Add entrypoint script to docker
+RUN mkdir /dockerentrypoint
+ADD scripts/copy-node-red-flow.sh /dockerentrypoint/
+RUN ["chmod", "+x", "/dockerentrypoint/copy-node-red-flow.sh"]
 
 # Change to default Node-RED working directory
 WORKDIR /usr/src/node-red
