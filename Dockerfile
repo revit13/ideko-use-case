@@ -104,6 +104,7 @@ ADD node-red-files/httpin-node/* ./node_modules/node-red/nodes/core/io/
 ADD node-red-files/savvy-node/* /savvy_node_data/
 
 # Add entrypoint script to docker
+RUN mkdir /dockerentrypoint
 ADD scripts/copy-node-red-flow.sh /dockerentrypoint/
 RUN ["chmod", "+x", "/dockerentrypoint/copy-node-red-flow.sh"]
 
