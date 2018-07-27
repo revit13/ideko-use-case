@@ -70,6 +70,9 @@ RUN apk add --no-cache --virtual .build-deps-yarn curl gnupg tar \
 
 #start of node-red install
 
+# Add bash
+RUN apk update && apk add bash
+
 # Home directory for Node-RED application source code.
 RUN mkdir -p /usr/src/node-red
 
