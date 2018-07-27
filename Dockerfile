@@ -119,6 +119,7 @@ RUN mkdir /dockerentrypoint
 ADD scripts/copy-node-red-flow.sh /dockerentrypoint/
 RUN ["chmod", "+x", "/dockerentrypoint/copy-node-red-flow.sh"]
 
+RUN mkdir /opt/blueprint
 VOLUME /opt/blueprint
 
 # Change to default Node-RED working directory
