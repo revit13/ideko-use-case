@@ -120,6 +120,10 @@ RUN mkdir /dockerentrypoint
 ADD scripts/copy-node-red-flow.sh /dockerentrypoint/
 RUN ["chmod", "+x", "/dockerentrypoint/copy-node-red-flow.sh"]
 
+# Create file
+RUN mkdir /opt/blueprint
+COPY /opt/blueprint/flows.json /opt/blueprint/flows.json
+
 # Change to default Node-RED working directory
 WORKDIR /usr/src/node-red
 ENV WORKINGDIR=/usr/src/node-red
