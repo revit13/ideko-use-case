@@ -115,16 +115,12 @@ WORKDIR /data
 RUN npm link savvy-contrib
 
 # Add entrypoint script to docker
-#RUN mkdir /dockerentrypoint
-#ADD scripts/copy-node-red-flow.sh /dockerentrypoint/
-#RUN ["chmod", "+x", "/dockerentrypoint/copy-node-red-flow.sh"]
-
-# Create file
-# RUN mkdir /opt/blueprint
-# ADD /opt/blueprint/flows.json /opt/blueprint/flows.json
+RUN mkdir /dockerentrypoint
+ADD scripts/copy-node-red-flow.sh /dockerentrypoint/
+RUN ["chmod", "+x", "/dockerentrypoint/copy-node-red-flow.sh"]
 
 # Change to default Node-RED working directory
 WORKDIR /usr/src/node-red
 ENV WORKINGDIR=/usr/src/node-red
-# ENTRYPOINT ["/dockerentrypoint/copy-node-red-flow.sh"]
+ENTRYPOINT ["/dockerentrypoint/copy-node-red-flow.sh"]
 CMD ["npm", "start", "--", "--userDir", "/data"]
